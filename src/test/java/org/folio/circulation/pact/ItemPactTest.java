@@ -120,15 +120,6 @@ public class ItemPactTest {
                   async.complete();
                   return null;
                 });  	 
-    	 });
-    
-       
-    
-   	
-        
-       
-     
-        
-}
-
+    	 });        
+     }
 }
