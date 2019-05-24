@@ -19,14 +19,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-class JsonSchemaValidator {
+public class JsonSchemaValidator {
   private final Schema schema;
 
   private JsonSchemaValidator(Schema schema) {
     this.schema = schema;
   }
 
-  static JsonSchemaValidator fromResource(String path) throws IOException {
+  public static JsonSchemaValidator fromResource(String path) throws IOException {
     final Schema schema = getSchema(path);
 
     return new JsonSchemaValidator(schema);
@@ -42,7 +42,7 @@ class JsonSchemaValidator {
     }
   }
 
-  Result<String> validate(String json) {
+  public Result<String> validate(String json) {
     try {
       schema.validate(new JSONObject(json));
 

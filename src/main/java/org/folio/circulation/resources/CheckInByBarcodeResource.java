@@ -15,15 +15,17 @@ import org.folio.circulation.domain.notice.PatronNoticeService;
 import org.folio.circulation.domain.policy.PatronNoticePolicyRepository;
 import org.folio.circulation.domain.representations.CheckInByBarcodeRequest;
 import org.folio.circulation.domain.representations.CheckInByBarcodeResponse;
+import org.folio.circulation.infrastructure.serialization.JsonSchemaValidator;
 import org.folio.circulation.storage.ItemByBarcodeInStorageFinder;
 import org.folio.circulation.storage.SingleOpenLoanForItemInStorageFinder;
 import org.folio.circulation.support.Clients;
-import org.folio.circulation.support.Result;
 import org.folio.circulation.support.ItemRepository;
+import org.folio.circulation.support.Result;
 import org.folio.circulation.support.RouteRegistration;
 import org.folio.circulation.support.http.server.WebContext;
 
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
@@ -56,8 +58,14 @@ public class CheckInByBarcodeResource extends Resource {
     final UpdateItem updateItem = new UpdateItem(clients);
     final UpdateRequestQueue requestQueueUpdate = UpdateRequestQueue.using(clients);
 
+    final Result<JsonSchemaValidator> schemaValidator = Result.of(
+      () -> JsonSchemaValidator.fromResource("/check-in-by-barcode-request.json"));
+
+    final JsonObject json = routingContext.getBodyAsJson();
+
     final Result<CheckInByBarcodeRequest> checkInRequestResult
-      = CheckInByBarcodeRequest.from(routingContext.getBodyAsJson());
+      = schemaValidator.next(validator -> validator.validate(json.toString()))
+      .next(x -> CheckInByBarcodeRequest.from(json));
 
     final String itemBarcode = checkInRequestResult
       .map(CheckInByBarcodeRequest::getItemBarcode)
