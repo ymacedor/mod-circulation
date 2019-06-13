@@ -22,11 +22,13 @@ import org.folio.circulation.domain.policy.RequestPolicyRepository;
 import org.folio.circulation.domain.validation.ClosedRequestValidator;
 import org.folio.circulation.domain.validation.ProxyRelationshipValidator;
 import org.folio.circulation.domain.validation.ServicePointPickupLocationValidator;
+import org.folio.circulation.infrastructure.serialization.JsonSchemaValidator;
 import org.folio.circulation.support.Clients;
 import org.folio.circulation.support.CreatedJsonResponseResult;
 import org.folio.circulation.support.ItemRepository;
 import org.folio.circulation.support.NoContentResult;
 import org.folio.circulation.support.OkJsonResponseResult;
+import org.folio.circulation.support.Result;
 import org.folio.circulation.support.http.server.WebContext;
 
 import io.vertx.core.http.HttpClient;
@@ -65,10 +67,13 @@ public class RequestCollectionResource extends CollectionResource {
         loanRepository,
         new ServicePointRepository(clients),
         createProxyRelationshipValidator(representation, clients),
-        new ServicePointPickupLocationValidator()
-      );
+        new ServicePointPickupLocationValidator());
 
-    requestFromRepresentationService.getRequestFrom(representation)
+    final Result<JsonSchemaValidator> schemaValidator = Result.of(
+      () -> JsonSchemaValidator.fromResource("/request.json"));
+
+    schemaValidator.next(validator -> validator.validate(representation.toString()))
+      .after(x -> requestFromRepresentationService.getRequestFrom(representation))
       .thenComposeAsync(r -> r.after(createRequestService::createRequest))
       .thenApply(r -> r.map(RequestAndRelatedRecords::getRequest))
       .thenApply(r -> r.map(new RequestRepresentation()::extendedRepresentation))

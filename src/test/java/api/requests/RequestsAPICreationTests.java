@@ -444,7 +444,6 @@ public class RequestsAPICreationTests extends APITests {
     assertThat(representation.getString("status"), is(status));
   }
 
-  //TODO: Replace with validation error message
   @Test
   @Parameters({
     "Non-existent status",
@@ -470,16 +469,12 @@ public class RequestsAPICreationTests extends APITests {
         .by(steve)
         .withStatus(status));
 
-    assertThat(String.format("Should not create request: %s", response.getBody()),
-      response, hasStatus(HTTP_BAD_REQUEST));
+    assertThat(response, hasStatus(HTTP_VALIDATION_ERROR));
 
-    assertThat(response.getBody(),
-      is("Request status must be \"Open - Not yet filled\", " +
-        "\"Open - Awaiting pickup\", \"Open - In transit\", " +
-        "\"Closed - Filled\", \"Closed - Unfilled\" or \"Closed - Pickup expired\""));
+    assertThat(response.getJson(), hasErrorWith(allOf(
+      hasMessage("#/status: #: only 1 subschema matches out of 2"))));
   }
 
-  //TODO: Replace with validation error message
   @Test
   @Parameters({
     "Non-existent status",
