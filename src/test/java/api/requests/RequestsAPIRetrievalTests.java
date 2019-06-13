@@ -13,9 +13,11 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
+import static org.joda.time.DateTimeZone.UTC;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -79,7 +81,9 @@ public class RequestsAPIRetrievalTests extends APITests {
 
     loansFixture.checkOutByBarcode(smallAngryPlanet);
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    final DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
+    final DateTime requestExpiration = new DateTime(2017, 7, 30, 0, 0, 0, UTC);
+    final DateTime holdShelfExpiration = new DateTime(2017, 8, 31, 0, 0, 0, UTC);
 
     final IndividualResource createdRequest = requestsClient.create(
       new RequestBuilder()
@@ -89,8 +93,8 @@ public class RequestsAPIRetrievalTests extends APITests {
         .by(sponsor)
         .proxiedBy(proxy)
         .fulfilToHoldShelf()
-        .withRequestExpiration(new LocalDate(2017, 7, 30))
-        .withHoldShelfExpiration(new LocalDate(2017, 8, 31))
+        .withRequestExpiration(requestExpiration)
+        .withHoldShelfExpiration(holdShelfExpiration)
         .withPickupServicePointId(pickupServicePointId)
         .withTags(new RequestBuilder.Tags(asList(NEW_TAG, IMPORTANT_TAG)))
     );
@@ -112,8 +116,10 @@ public class RequestsAPIRetrievalTests extends APITests {
     assertThat(representation.getString("itemId"), is(smallAngryPlanet.getId()));
     assertThat(representation.getString("requesterId"), is(sponsor.getId()));
     assertThat(representation.getString("fulfilmentPreference"), is("Hold Shelf"));
-    assertThat(representation.getString("requestExpirationDate"), is("2017-07-30"));
-    assertThat(representation.getString("holdShelfExpirationDate"), is("2017-08-31"));
+    assertThat(representation.getString("requestExpirationDate"),
+      isEquivalentTo(requestExpiration));
+    assertThat(representation.getString("holdShelfExpirationDate"),
+      isEquivalentTo(holdShelfExpiration));
     assertThat(representation.getString("pickupServicePointId"), is(pickupServicePointId));
     assertThat(representation.getString("status"), is("Open - Not yet filled"));
 

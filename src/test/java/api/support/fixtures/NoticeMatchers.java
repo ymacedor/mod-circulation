@@ -96,7 +96,7 @@ public class NoticeMatchers {
 
     Map<String, Matcher<String>> tokenMatchers = new HashMap<>();
     tokenMatchers.put("request.servicePointPickup", notNullValue(String.class));
-    tokenMatchers.put("request.requestExpirationDate ",
+    tokenMatchers.put("request.requestExpirationDate",
       isEquivalentTo(getDateTimeProperty(request, "requestExpirationDate")));
     tokenMatchers.put("request.holdShelfExpirationDate",
       isEquivalentTo(getDateTimeProperty(request, "holdShelfExpirationDate")));

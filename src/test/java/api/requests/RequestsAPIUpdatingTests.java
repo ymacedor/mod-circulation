@@ -14,6 +14,7 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
+import static org.joda.time.DateTimeZone.UTC;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -31,11 +32,8 @@ import org.awaitility.Awaitility;
 import org.folio.circulation.support.http.client.IndividualResource;
 import org.folio.circulation.support.http.client.Response;
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import api.support.APITests;
@@ -64,7 +62,9 @@ public class RequestsAPIUpdatingTests extends APITests {
 
     final IndividualResource steve = usersFixture.steve();
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    final DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
+    final DateTime requestExpiration = new DateTime(2017, 7, 30, 0, 0, 0, UTC);
+    final DateTime holdShelfExpiration = new DateTime(2017, 8, 31, 0, 0, 0, UTC);
 
     final IndividualResource exampleServicePoint = servicePointsFixture.cd1();
 
@@ -75,9 +75,9 @@ public class RequestsAPIUpdatingTests extends APITests {
       .forItem(temeraire)
       .by(steve)
       .fulfilToHoldShelf()
-      .withPickupServicePointId(exampleServicePoint.getId())
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31)));
+      .withRequestExpiration(requestExpiration)
+      .withHoldShelfExpiration(holdShelfExpiration)
+      .withPickupServicePointId(exampleServicePoint.getId()));
 
     final IndividualResource charlotte = usersFixture.charlotte();
 
@@ -101,8 +101,10 @@ public class RequestsAPIUpdatingTests extends APITests {
     assertThat(representation.getString("itemId"), is(temeraire.getId()));
     assertThat(representation.getString("requesterId"), is(charlotte.getId()));
     assertThat(representation.getString("fulfilmentPreference"), is("Hold Shelf"));
-    assertThat(representation.getString("requestExpirationDate"), is("2017-07-30"));
-    assertThat(representation.getString("holdShelfExpirationDate"), is("2017-08-31"));
+    assertThat(representation.getString("requestExpirationDate"),
+      isEquivalentTo(requestExpiration));
+    assertThat(representation.getString("holdShelfExpirationDate"),
+      isEquivalentTo(holdShelfExpiration));
 
     assertThat("has information taken from item",
       representation.containsKey("item"), is(true));
@@ -165,7 +167,7 @@ public class RequestsAPIUpdatingTests extends APITests {
           "Fake postal code",
           "Fake country code")));
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     final IndividualResource exampleServicePoint = servicePointsFixture.cd1();
 
@@ -500,13 +502,16 @@ public class RequestsAPIUpdatingTests extends APITests {
     ExecutionException {
 
     UUID requestCancellationTemplateId = UUID.randomUUID();
+
     JsonObject requestCancellationConfiguration = new NoticeConfigurationBuilder()
       .withTemplateId(requestCancellationTemplateId)
       .withEventType(REQUEST_CANCELLATION)
       .create();
+
     NoticePolicyBuilder noticePolicy = new NoticePolicyBuilder()
       .withName("Policy with request cancellation notice")
       .withLoanNotices(Collections.singletonList(requestCancellationConfiguration));
+
     useLoanPolicyAsFallback(
       loanPoliciesFixture.canCirculateRolling().getId(),
       requestPoliciesFixture.allowAllRequestPolicy().getId(),
@@ -514,8 +519,9 @@ public class RequestsAPIUpdatingTests extends APITests {
 
     final InventoryItemResource temeraire = itemsFixture.basedUponTemeraire();
     final IndividualResource requester = usersFixture.steve();
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     final IndividualResource exampleServicePoint = servicePointsFixture.cd1();
+
     IndividualResource createdRequest = requestsClient.create(
       new RequestBuilder()
         .page()
@@ -523,9 +529,9 @@ public class RequestsAPIUpdatingTests extends APITests {
         .forItem(temeraire)
         .by(requester)
         .fulfilToHoldShelf()
-        .withPickupServicePointId(exampleServicePoint.getId())
-        .withRequestExpiration(new LocalDate(2017, 7, 30))
-        .withHoldShelfExpiration(new LocalDate(2017, 8, 31)));
+        .withRequestExpiration(DateTime.now(UTC).plusWeeks(2))
+        .withHoldShelfExpiration(DateTime.now(UTC).plusDays(3))
+        .withPickupServicePointId(exampleServicePoint.getId()));
 
     JsonObject updatedRequest = RequestBuilder.from(createdRequest)
       .cancelled()
@@ -544,8 +550,8 @@ public class RequestsAPIUpdatingTests extends APITests {
     noticeContextMatchers.putAll(NoticeMatchers.getItemContextMatchers(temeraire));
     noticeContextMatchers.putAll(NoticeMatchers.getRequestContextMatchers(updatedRequest));
     noticeContextMatchers.putAll(NoticeMatchers.getCancelledRequestContextMatchers(updatedRequest));
-    MatcherAssert.assertThat(sentNotices,
-      hasItems(
+
+    assertThat(sentNotices, hasItems(
         hasEmailNoticeProperties(requester.getId(), requestCancellationTemplateId, noticeContextMatchers)));
   }
 
@@ -565,7 +571,7 @@ public class RequestsAPIUpdatingTests extends APITests {
 
     proxyRelationshipsFixture.currentProxyFor(steve, charlotte);
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     final IndividualResource exampleServicePoint = servicePointsFixture.cd1();
 
@@ -577,9 +583,7 @@ public class RequestsAPIUpdatingTests extends APITests {
         .by(steve)
         .proxiedBy(charlotte)
         .fulfilToHoldShelf()
-        .withPickupServicePointId(exampleServicePoint.getId())
-        .withRequestExpiration(new LocalDate(2017, 7, 30))
-        .withHoldShelfExpiration(new LocalDate(2017, 8, 31)));
+        .withPickupServicePointId(exampleServicePoint.getId()));
 
     requestsClient.replace(createdRequest.getId(), createdRequest.copyJson());
 

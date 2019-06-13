@@ -32,8 +32,8 @@ public class RequestBuilder extends JsonBuilder implements Builder {
   private final UUID requesterId;
   private final String fulfilmentPreference;
   private final UUID deliveryAddressTypeId;
-  private final LocalDate requestExpirationDate;
-  private final LocalDate holdShelfExpirationDate;
+  private final DateTime requestExpirationDate;
+  private final DateTime holdShelfExpirationDate;
   private final ItemSummary itemSummary;
   private final PatronSummary requesterSummary;
   private final String status;
@@ -78,8 +78,8 @@ public class RequestBuilder extends JsonBuilder implements Builder {
     UUID requesterId,
     String fulfilmentPreference,
     UUID deliveryAddressTypeId,
-    LocalDate requestExpirationDate,
-    LocalDate holdShelfExpirationDate,
+    DateTime requestExpirationDate,
+    DateTime holdShelfExpirationDate,
     ItemSummary itemSummary,
     PatronSummary requesterSummary,
     String status,
@@ -125,8 +125,8 @@ public class RequestBuilder extends JsonBuilder implements Builder {
       getUUIDProperty(representation, "requesterId"),
       getProperty(representation, "fulfilmentPreference"),
       getUUIDProperty(representation, "deliveryAddressTypeId"),
-      getLocalDateProperty(representation, "requestExpirationDate"),
-      getLocalDateProperty(representation, "holdShelfExpirationDate"),
+      getDateTimeProperty(representation, "requestExpirationDate"),
+      getDateTimeProperty(representation, "holdShelfExpirationDate"),
       null, //TODO, re-populate these from the representation (possibly shouldn't given use)
       null, //TODO, re-populate these from the representation (possibly shouldn't given use)
       getProperty(representation, "status"),
@@ -377,7 +377,7 @@ public class RequestBuilder extends JsonBuilder implements Builder {
       this.tags);
   }
 
-  public RequestBuilder withRequestExpiration(LocalDate requestExpiration) {
+  public RequestBuilder withRequestExpiration(DateTime requestExpiration) {
     return new RequestBuilder(
       this.id,
       this.requestType,
@@ -401,7 +401,7 @@ public class RequestBuilder extends JsonBuilder implements Builder {
       this.tags);
   }
 
-  public RequestBuilder withHoldShelfExpiration(LocalDate holdShelfExpiration) {
+  public RequestBuilder withHoldShelfExpiration(DateTime holdShelfExpiration) {
     return new RequestBuilder(
       this.id,
       this.requestType,

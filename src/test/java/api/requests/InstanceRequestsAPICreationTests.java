@@ -2,13 +2,12 @@ package api.requests;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
+import static org.joda.time.DateTimeZone.UTC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -21,8 +20,6 @@ import org.folio.circulation.support.http.client.IndividualResource;
 import org.folio.circulation.support.http.client.Response;
 import org.folio.circulation.support.http.client.ResponseHandler;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 
@@ -42,7 +39,7 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
     UUID requesterId = usersFixture.jessica().getId();
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     DateTime requestExpirationDate = requestDate.plusDays(30);
 
     IndividualResource instanceMultipleCopies = instancesFixture.basedUponDunkirk();
@@ -81,7 +78,7 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
     UUID requesterId = usersFixture.jessica().getId();
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     DateTime requestExpirationDate = requestDate.plusDays(30);
 
     IndividualResource instance = instancesFixture.basedUponDunkirk();
@@ -117,7 +114,7 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
     UUID requesterId = usersFixture.jessica().getId();
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     IndividualResource instance = instancesFixture.basedUponDunkirk();
     IndividualResource holdings = holdingsFixture.defaultWithHoldings(instance.getId());
@@ -152,7 +149,7 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
     UUID requesterId = usersFixture.jessica().getId();
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     DateTime requestExpirationDate = requestDate.plusDays(30);
 
     IndividualResource instance = instancesFixture.basedUponDunkirk();
@@ -191,7 +188,7 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
     UUID requesterId = usersFixture.jessica().getId();
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     DateTime requestExpirationDate = requestDate.plusDays(30);
 
     IndividualResource instance = instancesFixture.basedUponDunkirk();
@@ -230,8 +227,8 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
 
-    LocalDate requestDate = new LocalDate(2017, 7, 22);
-    LocalDate requestExpirationDate = requestDate.plusDays(30);
+    DateTime requestDate = new DateTime(2017, 7, 22, 0, 0, 0, UTC);
+    DateTime requestExpirationDate = requestDate.plusDays(30);
 
     IndividualResource instance = instancesFixture.basedUponDunkirk();
     IndividualResource holdings = holdingsFixture.defaultWithHoldings(instance.getId());
@@ -248,7 +245,7 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     IndividualResource instanceRequester = usersFixture.charlotte();
 
-    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     DateTime instanceRequestDateRequestExpirationDate = instanceRequestDate.plusDays(30);
 
     JsonObject requestBody = createInstanceRequestObject(instance.getId(), instanceRequester.getId(),
@@ -276,8 +273,8 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
 
-    LocalDate requestDate = new LocalDate(2017, 7, 22);
-    LocalDate requestExpirationDate = requestDate.plusDays(30);
+    DateTime requestDate = new DateTime(2017, 7, 22, 0, 0, 0, UTC);
+    DateTime requestExpirationDate = requestDate.plusDays(30);
 
     IndividualResource instance = instancesFixture.basedUponDunkirk();
     IndividualResource holdings = holdingsFixture.defaultWithHoldings(instance.getId());
@@ -292,7 +289,7 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     IndividualResource instanceRequester = usersFixture.charlotte();
 
-    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     DateTime instanceRequestDateRequestExpirationDate = instanceRequestDate.plusDays(30);
 
     JsonObject requestBody = createInstanceRequestObject(instance.getId(), instanceRequester.getId(),
@@ -319,12 +316,12 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
 
-    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     DateTime instanceRequestDateRequestExpirationDate = instanceRequestDate.plusDays(30);
 
-    LocalDate requestDate = new LocalDate(2017, 7, 22);
-    LocalDate requestExpirationDate1 = requestDate.plusDays(30);
-    LocalDate requestExpirationDate2 = requestDate.minusDays(30);
+    DateTime requestDate = new DateTime(2017, 7, 22, 0, 0, 0, UTC);
+    DateTime requestExpirationDate1 = requestDate.plusDays(30);
+    DateTime requestExpirationDate2 = requestDate.minusDays(30);
 
     IndividualResource instance = instancesFixture.basedUponDunkirk();
     IndividualResource holdings = holdingsFixture.defaultWithHoldings(instance.getId());
@@ -375,11 +372,11 @@ public class InstanceRequestsAPICreationTests extends APITests {
 
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
 
-    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     DateTime instanceRequestDateRequestExpirationDate = instanceRequestDate.plusDays(30);
 
-    LocalDate requestDate = new LocalDate(2017, 7, 22);
-    LocalDate requestExpirationDate1 = requestDate.plusDays(30);
+    DateTime requestDate = new DateTime(2017, 7, 22, 0, 0, UTC);
+    DateTime requestExpirationDate1 = requestDate.plusDays(30);
 
     IndividualResource instance = instancesFixture.basedUponDunkirk();
     IndividualResource holdings = holdingsFixture.defaultWithHoldings(instance.getId());
@@ -420,12 +417,12 @@ public class InstanceRequestsAPICreationTests extends APITests {
     //could be given a successful request on an unavailable item instead, if there is any.
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
 
-    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime instanceRequestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     DateTime instanceRequestDateRequestExpirationDate = instanceRequestDate.plusDays(30);
 
-    LocalDate requestDate = new LocalDate(2017, 7, 22);
-    LocalDate requestExpirationDate1 = requestDate.plusDays(30);
-    LocalDate requestExpirationDate2 = requestDate.minusDays(30);
+    DateTime requestDate = new DateTime(2017, 7, 22, 0, 0, 0, UTC);
+    DateTime requestExpirationDate1 = requestDate.plusDays(30);
+    DateTime requestExpirationDate2 = requestDate.minusDays(30);
 
     IndividualResource instance = instancesFixture.basedUponDunkirk();
     IndividualResource holdings = holdingsFixture.defaultWithHoldings(instance.getId());
@@ -488,7 +485,7 @@ public class InstanceRequestsAPICreationTests extends APITests {
   }
 
   private void placeHoldRequest(IndividualResource item, UUID requestPickupServicePointId,
-                                IndividualResource patron, LocalDate requestExpirationDate){
+                                IndividualResource patron, DateTime requestExpirationDate){
 
     IndividualResource holdRequest = null;
     try {
@@ -514,7 +511,8 @@ public class InstanceRequestsAPICreationTests extends APITests {
   }
 
   private void placePagedRequest(IndividualResource item, UUID requestPickupServicePointId,
-                                IndividualResource patron, LocalDate requestExpirationDate){
+                                 IndividualResource patron, DateTime requestExpirationDate) {
+
     IndividualResource pagedRequest = null;
       try {
         pagedRequest = requestsClient.create(

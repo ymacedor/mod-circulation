@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
+import static org.joda.time.DateTimeZone.UTC;
 
 import java.net.MalformedURLException;
 import java.time.Clock;
@@ -48,11 +49,8 @@ import org.folio.circulation.support.ClockManager;
 import org.folio.circulation.support.http.client.IndividualResource;
 import org.folio.circulation.support.http.client.Response;
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -99,7 +97,9 @@ public class RequestsAPICreationTests extends APITests {
 
     IndividualResource requester = usersFixture.steve();
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    final DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
+    final DateTime requestExpiration = new DateTime(2017, 7, 30, 0, 0, 0, UTC);
+    final DateTime holdShelfExpiration = new DateTime(2017, 8, 31, 0, 0, 0, UTC);
 
     IndividualResource request = requestsFixture.place(new RequestBuilder()
       .withId(id)
@@ -109,8 +109,8 @@ public class RequestsAPICreationTests extends APITests {
       .by(requester)
       .withRequestDate(requestDate)
       .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31))
+      .withRequestExpiration(requestExpiration)
+      .withHoldShelfExpiration(holdShelfExpiration)
       .withPickupServicePointId(pickupServicePointId)
       .withTags(new RequestBuilder.Tags(asList("new", "important"))));
 
@@ -122,8 +122,10 @@ public class RequestsAPICreationTests extends APITests {
     assertThat(representation.getString("itemId"), is(item.getId().toString()));
     assertThat(representation.getString("requesterId"), is(requester.getId().toString()));
     assertThat(representation.getString("fulfilmentPreference"), is("Hold Shelf"));
-    assertThat(representation.getString("requestExpirationDate"), is("2017-07-30"));
-    assertThat(representation.getString("holdShelfExpirationDate"), is("2017-08-31"));
+    assertThat(representation.getString("requestExpirationDate"),
+      isEquivalentTo(requestExpiration));
+    assertThat(representation.getString("holdShelfExpirationDate"),
+      isEquivalentTo(holdShelfExpiration));
     assertThat(representation.getString("status"), is("Open - Not yet filled"));
     assertThat(representation.getString("pickupServicePointId"), is(pickupServicePointId.toString()));
 
@@ -193,22 +195,25 @@ public class RequestsAPICreationTests extends APITests {
 
     IndividualResource requester = usersFixture.steve();
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    final DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
+    final DateTime requestExpiration = new DateTime(2017, 7, 30, 0, 0, 0, UTC);
+    final DateTime holdShelfExpiration = new DateTime(2017, 8, 31, 0, 0, 0, UTC);
 
     final UUID pickupServicePointId = servicePointsFixture.cd1().getId();
 
-    Response response = requestsClient.attemptCreateAtSpecificLocation(new RequestBuilder()
-      .withId(id)
-      .open()
-      .recall()
-      .forItem(item)
-      .by(requester)
-      .withRequestDate(requestDate)
-      .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31))
-      .withPickupServicePointId(pickupServicePointId)
-      .withTags(new RequestBuilder.Tags(asList("new", "important"))));
+    Response response = requestsClient.attemptCreateAtSpecificLocation(
+      new RequestBuilder()
+        .withId(id)
+        .open()
+        .recall()
+        .forItem(item)
+        .by(requester)
+        .withRequestDate(requestDate)
+        .fulfilToHoldShelf()
+        .withRequestExpiration(requestExpiration)
+        .withHoldShelfExpiration(holdShelfExpiration)
+        .withPickupServicePointId(pickupServicePointId)
+        .withTags(new RequestBuilder.Tags(asList("new", "important"))));
 
     assertThat(response.getStatusCode(), is(204));
 
@@ -222,8 +227,10 @@ public class RequestsAPICreationTests extends APITests {
     assertThat(representation.getString("itemId"), is(item.getId().toString()));
     assertThat(representation.getString("requesterId"), is(requester.getId().toString()));
     assertThat(representation.getString("fulfilmentPreference"), is("Hold Shelf"));
-    assertThat(representation.getString("requestExpirationDate"), is("2017-07-30"));
-    assertThat(representation.getString("holdShelfExpirationDate"), is("2017-08-31"));
+    assertThat(representation.getString("requestExpirationDate"),
+      isEquivalentTo(requestExpiration));
+    assertThat(representation.getString("holdShelfExpirationDate"),
+      isEquivalentTo(holdShelfExpiration));
     assertThat(representation.getString("status"), is("Open - Not yet filled"));
 
     assertThat("has information taken from item",
@@ -389,7 +396,7 @@ public class RequestsAPICreationTests extends APITests {
 
     itemsClient.replace(itemId, itemWithChangedStatus);
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     requestsFixture.place(new RequestBuilder()
       .recall()
@@ -398,9 +405,7 @@ public class RequestsAPICreationTests extends APITests {
       .forItem(smallAngryPlanet)
       .by(steve)
       .withPickupServicePointId(pickupServicePointId)
-      .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31)));
+      .fulfilToHoldShelf());
   }
 
   @Test
@@ -602,7 +607,7 @@ public class RequestsAPICreationTests extends APITests {
 
     loansFixture.checkOutByBarcode(smallAngryPlanet, jessica);
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     final Response recallResponse = requestsClient.attemptCreate(new RequestBuilder()
       .recall()
@@ -632,7 +637,7 @@ public class RequestsAPICreationTests extends APITests {
 
     UUID nonExistentRequesterId = UUID.randomUUID();
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     final Response recallResponse = requestsClient.attemptCreate(new RequestBuilder()
       .recall()
@@ -663,7 +668,7 @@ public class RequestsAPICreationTests extends APITests {
 
     loansFixture.checkOutByBarcode(smallAngryPlanet, jessica);
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     IndividualResource createdRequest = requestsFixture.place(new RequestBuilder()
       .recall()
@@ -710,7 +715,7 @@ public class RequestsAPICreationTests extends APITests {
 
     loansFixture.checkOutByBarcode(smallAngryPlanet, james);
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     IndividualResource createdRequest = requestsFixture.place(new RequestBuilder()
       .recall()
@@ -791,7 +796,7 @@ public class RequestsAPICreationTests extends APITests {
 
     loansFixture.checkOutByBarcode(smallAngryPlanet, rebecca);
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     JsonObject request = new RequestBuilder()
       .recall()
@@ -855,7 +860,7 @@ public class RequestsAPICreationTests extends APITests {
 
     IndividualResource requester = usersFixture.steve();
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     Response postResponse = requestsClient.attemptCreate(new RequestBuilder()
       .open()
@@ -863,9 +868,7 @@ public class RequestsAPICreationTests extends APITests {
       .forItem(item)
       .by(requester)
       .withRequestDate(requestDate)
-      .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31)));
+      .fulfilToHoldShelf());
 
     assertThat(postResponse, hasStatus(HTTP_VALIDATION_ERROR));
 
@@ -888,7 +891,7 @@ public class RequestsAPICreationTests extends APITests {
 
     IndividualResource requester = usersFixture.steve();
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     Response postResponse = requestsClient.attemptCreate(new RequestBuilder()
       .open()
@@ -897,8 +900,6 @@ public class RequestsAPICreationTests extends APITests {
       .by(requester)
       .withRequestDate(requestDate)
       .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31))
       .withPickupServicePointId(pickupServicePointId));
 
     assertThat(postResponse, hasStatus(HTTP_VALIDATION_ERROR));
@@ -923,7 +924,7 @@ public class RequestsAPICreationTests extends APITests {
 
     IndividualResource requester = usersFixture.steve();
 
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
 
     Response postResponse = requestsClient.attemptCreate(new RequestBuilder()
       .open()
@@ -932,8 +933,6 @@ public class RequestsAPICreationTests extends APITests {
       .by(requester)
       .withRequestDate(requestDate)
       .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31))
       .withPickupServicePointId(pickupServicePointId));
 
     assertThat(postResponse, hasStatus(HTTP_VALIDATION_ERROR));
@@ -1441,7 +1440,7 @@ public class RequestsAPICreationTests extends APITests {
       .withPickupServicePointId(requestPickupServicePoint.getId())
       .by(usersFixture.james()));
 
-    loansFixture.checkInByBarcode(smallAngryPlanet, DateTime.now(DateTimeZone.UTC), requestPickupServicePoint.getId());
+    loansFixture.checkInByBarcode(smallAngryPlanet, DateTime.now(UTC), requestPickupServicePoint.getId());
 
     Response pagedRequestRecord = itemsClient.getById(smallAngryPlanet.getId());
     assertThat(pagedRequestRecord.getJson().getJsonObject("status").getString("name"), is(ItemStatus.AWAITING_PICKUP.getValue()));
@@ -1472,7 +1471,7 @@ public class RequestsAPICreationTests extends APITests {
     assertThat(firstRequest.getJson().getString("status"), is(RequestStatus.OPEN_NOT_YET_FILLED.getValue()));
 
     //check it it at the "wrong" or unintended pickup location
-    loansFixture.checkInByBarcode(smallAngryPlanet, DateTime.now(DateTimeZone.UTC), pickupServicePoint.getId());
+    loansFixture.checkInByBarcode(smallAngryPlanet, DateTime.now(UTC), pickupServicePoint.getId());
 
     MultipleRecords<JsonObject> requests = requestsFixture.getQueueFor(smallAngryPlanet);
     JsonObject pagedRequestRecord = requests.getRecords().iterator().next();
@@ -1526,7 +1525,8 @@ public class RequestsAPICreationTests extends APITests {
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
     IndividualResource item = itemsFixture.basedUponSmallAngryPlanet();
     IndividualResource requester = usersFixture.steve();
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
+
     IndividualResource request = requestsFixture.place(new RequestBuilder()
       .withId(id)
       .open()
@@ -1534,9 +1534,9 @@ public class RequestsAPICreationTests extends APITests {
       .forItem(item)
       .by(requester)
       .withRequestDate(requestDate)
+      .withRequestExpiration(DateTime.now(UTC).plusWeeks(2))
+      .withHoldShelfExpiration(DateTime.now(UTC).plusDays(3))
       .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31))
       .withPickupServicePointId(pickupServicePointId)
       .withTags(new RequestBuilder.Tags(asList("new", "important"))));
 
@@ -1549,8 +1549,8 @@ public class RequestsAPICreationTests extends APITests {
     noticeContextMatchers.putAll(NoticeMatchers.getUserContextMatchers(requester));
     noticeContextMatchers.putAll(NoticeMatchers.getItemContextMatchers(item));
     noticeContextMatchers.putAll(NoticeMatchers.getRequestContextMatchers(request));
-    MatcherAssert.assertThat(sentNotices,
-      hasItems(
+
+    assertThat(sentNotices, hasItems(
         hasEmailNoticeProperties(requester.getId(), pageConfirmationTemplateId, noticeContextMatchers)));
   }
 
@@ -1583,7 +1583,9 @@ public class RequestsAPICreationTests extends APITests {
     UUID pickupServicePointId = servicePointsFixture.cd1().getId();
     IndividualResource item = itemsFixture.basedUponSmallAngryPlanet();
     IndividualResource requester = usersFixture.steve();
-    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
+    final DateTime requestExpiration = new DateTime(2017, 7, 30, 0, 0, 0, UTC);
+    final DateTime holdShelfExpiration = new DateTime(2017, 8, 31, 0, 0, 0, UTC);
 
     loansFixture.checkOutByBarcode(item, usersFixture.jessica());
 
@@ -1595,9 +1597,9 @@ public class RequestsAPICreationTests extends APITests {
       .by(requester)
       .withRequestDate(requestDate)
       .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31))
       .withPickupServicePointId(pickupServicePointId)
+      .withRequestExpiration(requestExpiration)
+      .withHoldShelfExpiration(holdShelfExpiration)
       .withTags(new RequestBuilder.Tags(asList("new", "important"))));
 
     Awaitility.await()
@@ -1609,9 +1611,9 @@ public class RequestsAPICreationTests extends APITests {
     noticeContextMatchers.putAll(NoticeMatchers.getUserContextMatchers(requester));
     noticeContextMatchers.putAll(NoticeMatchers.getItemContextMatchers(item));
     noticeContextMatchers.putAll(NoticeMatchers.getRequestContextMatchers(request));
-    MatcherAssert.assertThat(sentNotices,
-      hasItems(
-        hasEmailNoticeProperties(requester.getId(), holdConfirmationTemplateId, noticeContextMatchers)));
+
+    assertThat(sentNotices, hasItems(
+      hasEmailNoticeProperties(requester.getId(), holdConfirmationTemplateId, noticeContextMatchers)));
   }
 
   @Test
@@ -1659,7 +1661,7 @@ public class RequestsAPICreationTests extends APITests {
     IndividualResource requester = usersFixture.steve();
     IndividualResource loanOwner = usersFixture.jessica();
 
-    DateTime loanDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime loanDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     IndividualResource loan = loansFixture.checkOutByBarcode(item, loanOwner, loanDate);
 
     DateTime requestDate = loanDate.plusDays(1);
@@ -1672,9 +1674,9 @@ public class RequestsAPICreationTests extends APITests {
       .forItem(item)
       .by(requester)
       .withRequestDate(requestDate)
+      .withRequestExpiration(DateTime.now(UTC).plusWeeks(2))
+      .withHoldShelfExpiration(DateTime.now(UTC).plusDays(3))
       .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31))
       .withPickupServicePointId(pickupServicePointId)
       .withTags(new RequestBuilder.Tags(asList("new", "important"))));
     IndividualResource loanAfterRecall = loansClient.get(loan.getId());
@@ -1693,8 +1695,8 @@ public class RequestsAPICreationTests extends APITests {
     recallNotificationContextMatchers.putAll(NoticeMatchers.getUserContextMatchers(loanOwner));
     recallNotificationContextMatchers.putAll(NoticeMatchers.getItemContextMatchers(item));
     recallNotificationContextMatchers.putAll(NoticeMatchers.getLoanContextMatchers(loanAfterRecall, 0));
-    MatcherAssert.assertThat(sentNotices,
-      hasItems(
+
+    assertThat(sentNotices, hasItems(
         hasEmailNoticeProperties(requester.getId(), recallConfirmationTemplateId,
           recallConfirmationContextMatchers),
         hasEmailNoticeProperties(loanOwner.getId(), recallToLoaneeTemplateId,
@@ -1737,7 +1739,7 @@ public class RequestsAPICreationTests extends APITests {
     IndividualResource requester = usersFixture.steve();
     IndividualResource loanOwner = usersFixture.jessica();
 
-    DateTime loanDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    DateTime loanDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
     loansFixture.checkOutByBarcode(item, loanOwner, loanDate);
 
     DateTime requestDate = loanDate.plusDays(1);
@@ -1751,8 +1753,6 @@ public class RequestsAPICreationTests extends APITests {
       .by(requester)
       .withRequestDate(requestDate)
       .fulfilToHoldShelf()
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
-      .withHoldShelfExpiration(new LocalDate(2017, 8, 31))
       .withPickupServicePointId(pickupServicePointId)
       .withTags(new RequestBuilder.Tags(asList("new", "important"))));
 

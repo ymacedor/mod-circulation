@@ -17,7 +17,6 @@ import org.folio.circulation.support.http.client.IndividualResource;
 import org.folio.circulation.support.http.client.Response;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import api.support.APITests;
@@ -88,7 +87,7 @@ public class ClosedRequestTests extends APITests {
     Response response = requestsClient.attemptReplace(request.getId(),
       RequestBuilder.from(request)
         .open()
-        .withRequestExpiration(new LocalDate(2018, 3, 14)));
+        .withRequestExpiration(DateTime.now().plusWeeks(2)));
 
     assertThat(response.getStatusCode(), is(422));
 
@@ -124,7 +123,7 @@ public class ClosedRequestTests extends APITests {
     Response response = requestsClient.attemptReplace(request.getId(),
       RequestBuilder.from(request)
         .open()
-        .withRequestExpiration(new LocalDate(2018, 3, 14)));
+        .withRequestExpiration(DateTime.now().plusWeeks(2)));
 
     assertThat(response.getStatusCode(), is(422));
 

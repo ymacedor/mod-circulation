@@ -2,12 +2,11 @@ package org.folio.circulation.domain;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
+import static org.joda.time.DateTimeZone.UTC;
 
 import java.util.UUID;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -76,7 +75,8 @@ public class RequestRepresentationTests {
 
     final UUID requesterId = UUID.fromString(requester.getId());
 
-    final DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, DateTimeZone.UTC);
+    final DateTime requestDate = new DateTime(2017, 7, 22, 10, 22, 54, UTC);
+    final DateTime requestExpiration = new DateTime(2017, 7, 30, 0, 0, 0, UTC);
 
     final ServicePointBuilder servicePointBuilder = new ServicePointBuilder("Circ Desk", "cd1", "Circulation Desk")
       .withId(SERVICE_POINT_ID)
@@ -92,7 +92,7 @@ public class RequestRepresentationTests {
       .withRequesterId(requesterId)
       .fulfilToHoldShelf()
       .withPickupServicePointId(SERVICE_POINT_ID)
-      .withRequestExpiration(new LocalDate(2017, 7, 30))
+      .withRequestExpiration(requestExpiration)
       .deliverToAddress(ADDRESS_ID)
       .create();
 
