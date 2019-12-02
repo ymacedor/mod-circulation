@@ -7,6 +7,7 @@ import static org.folio.circulation.domain.representations.LoanProperties.PATRON
 import static org.folio.circulation.domain.representations.LoanProperties.PATRON_GROUP_ID_AT_CHECKOUT;
 import static org.folio.circulation.support.CqlQuery.exactMatch;
 import static org.folio.circulation.support.CqlQuery.exactMatchAny;
+import static org.folio.circulation.support.CqlQuery.isNotEmpty;
 import static org.folio.circulation.support.JsonPropertyWriter.write;
 import static org.folio.circulation.support.Result.failed;
 import static org.folio.circulation.support.Result.of;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import io.vertx.core.json.JsonObject;
 import org.folio.circulation.domain.policy.LoanPolicy;
 import org.folio.circulation.domain.representations.LoanProperties;
 import org.folio.circulation.support.Clients;
@@ -42,8 +44,6 @@ import org.folio.circulation.support.http.client.ResponseInterpreter;
 import org.folio.circulation.support.results.CommonFailures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.vertx.core.json.JsonObject;
 
 public class LoanRepository {
   private final CollectionResourceClient loansStorageClient;
@@ -163,8 +163,11 @@ public class LoanRepository {
     return result.combineAfter(userRepository::getUser, Loan::withUser);
   }
 
-  public CompletableFuture<Result<MultipleRecords<Loan>>> findClosedLoans(int fetchLoansLimit) {
-    return queryLoanStorage(fetchLoansLimit, getStatusCQLQuery("Closed"));
+  public CompletableFuture<Result<MultipleRecords<Loan>>> findClosedLoansWithUserId(int fetchLoansLimit) {
+    Result<CqlQuery> userIdIsNotEmpty = isNotEmpty("userId");
+    Result<CqlQuery> loansToBeAnonymized = getStatusCQLQuery("Closed")
+      .combine(userIdIsNotEmpty, CqlQuery::and);
+    return queryLoanStorage(fetchLoansLimit, loansToBeAnonymized);
   }
 
   private CompletableFuture<Result<MultipleRecords<Loan>>> queryLoanStorage(
@@ -175,7 +178,7 @@ public class LoanRepository {
         .thenApply(result -> result.next(this::mapResponseToLoans));
   }
 
-  public CompletableFuture<Result<MultipleRecords<Loan>>> findClosedLoans(
+  public CompletableFuture<Result<MultipleRecords<Loan>>> findClosedLoansWithUserId(
       String userId, int fetchLoansLimit) {
     Result<CqlQuery> query = exactMatch("userId", userId);
     final Result<CqlQuery> statusQuery = getStatusCQLQuery("Closed");

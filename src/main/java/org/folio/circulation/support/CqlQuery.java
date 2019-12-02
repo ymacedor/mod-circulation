@@ -29,6 +29,10 @@ public class CqlQuery {
     return Result.of(() -> new CqlQuery(format("%s==\"%s\"", index, value), none()));
   }
 
+  public static Result<CqlQuery> isNotEmpty(String index) {
+    return Result.of(() -> new CqlQuery(format("%s=\"\"", index), none()));
+  }
+
   public static Result<CqlQuery> exactMatchAny(String indexName, Collection<String> values) {
     final List<String> filteredValues = filterNullValues(values);
 
