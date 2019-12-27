@@ -3,6 +3,7 @@ package api.loans.scenarios;
 import static api.support.http.InterfaceUrls.loansUrl;
 import static api.support.matchers.PatronNoticeMatcher.hasEmailNoticeProperties;
 import static api.support.matchers.TextDateTimeMatcher.isEquivalentTo;
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static org.folio.circulation.support.JsonPropertyWriter.write;
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -261,5 +262,37 @@ public class ChangeDueDateTests extends APITests {
     MatcherAssert.assertThat(sentNotices,
       hasItems(
         hasEmailNoticeProperties(steve.getId(), manualDueDateChangeTemplateId, noticeContextMatchers)));
+  }
+
+  @Test
+  public void cannotChangeDueDateForDeclaredLostItem()
+    throws InterruptedException,
+    MalformedURLException,
+    TimeoutException,
+    ExecutionException {
+
+    final IndividualResource item = itemsFixture.setupDeclaredLostItem();
+
+    IndividualResource loan = loansFixture.checkOutByBarcode(item);
+
+    Response fetchedLoan = loansClient.getById(loan.getId());
+
+    JsonObject loanToChange = fetchedLoan.getJson().copy();
+
+    DateTime dueDate = DateTime.parse(loanToChange.getString("dueDate"));
+    DateTime newDueDate = dueDate.plus(Period.days(14));
+
+    write(loanToChange, "action", "dueDateChange");
+    write(loanToChange, "dueDate", newDueDate);
+
+    CompletableFuture<Response> putCompleted = new CompletableFuture<>();
+
+    client.put(loansUrl(String.format("/%s", loan.getId())), loanToChange,
+      ResponseHandler.any(putCompleted));
+
+    Response putResponse = putCompleted.get(5, TimeUnit.SECONDS);
+
+    assertThat("Item is Declared lost",
+      putResponse.getStatusCode(), is(HTTP_BAD_REQUEST));
   }
 }
