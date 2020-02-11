@@ -257,5 +257,4 @@ public class ItemsInTransitResource extends Resource {
       .map(ServicePoint::getName).orElse(null))
       .orElse(null), Comparator.nullsLast(String::compareTo));
   }
-
 }
