@@ -47,14 +47,6 @@ public class CqlQueryFinder<T> implements FindWithCqlQuery<T> {
       .thenApply(result -> result.next(this::mapToRecords));
   }
 
-  @Override
-  public CompletableFuture<Result<MultipleRecords<T>>> findByQuery(
-    Result<CqlQuery> queryResult, PageLimit pageLimit) {
-
-    return queryResult.after(query -> client.getMany(query, pageLimit))
-      .thenApply(result -> result.next(this::mapToRecords));
-  }
-
   private Result<MultipleRecords<T>> mapToRecords(Response response) {
     return MultipleRecords.from(response, recordMapper, recordsPropertyName);
   }
