@@ -1,6 +1,6 @@
 package org.folio.circulation.support.fetching;
 
-import static org.folio.circulation.support.http.client.PageLimit.noLimit;
+import static org.folio.circulation.support.http.client.PageLimit.limit;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -16,23 +16,34 @@ import org.folio.circulation.support.http.client.Response;
 import io.vertx.core.json.JsonObject;
 
 public class CqlQueryFinder<T> implements FindWithCqlQuery<T> {
+  private static final PageLimit DEFAULT_PAGE_LIMIT = limit(1000);
+
   private final GetManyRecordsClient client;
   private final String recordsPropertyName;
   private final Function<JsonObject, T> recordMapper;
+  private final PageLimit pageLimit;
 
   public CqlQueryFinder(GetManyRecordsClient client,
     String recordsPropertyName, Function<JsonObject, T> recordMapper) {
 
+    this(client, recordsPropertyName, recordMapper, DEFAULT_PAGE_LIMIT);
+  }
+
+  public CqlQueryFinder(GetManyRecordsClient client,
+    String recordsPropertyName, Function<JsonObject, T> recordMapper,
+    PageLimit pageLimit) {
+
     this.client = client;
     this.recordsPropertyName = recordsPropertyName;
     this.recordMapper = recordMapper;
+    this.pageLimit = pageLimit;
   }
 
   @Override
   public CompletableFuture<Result<MultipleRecords<T>>> findByQuery(
     Result<CqlQuery> queryResult) {
 
-    return findByQuery(queryResult, noLimit());
+    return findByQuery(queryResult, pageLimit);
   }
 
   @Override
