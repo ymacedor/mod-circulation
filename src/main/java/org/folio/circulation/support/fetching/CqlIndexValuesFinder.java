@@ -8,7 +8,6 @@ import static org.folio.circulation.support.Result.of;
 import static org.folio.circulation.support.fetching.MultipleCqlIndexValuesCriteria.byId;
 import static org.folio.circulation.support.fetching.MultipleCqlIndexValuesCriteria.byIndex;
 import static org.folio.circulation.support.http.client.CqlQuery.exactMatchAny;
-import static org.folio.circulation.support.http.client.PageLimit.maximumLimit;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -88,7 +87,7 @@ public class CqlIndexValuesFinder<T> implements FindWithMultipleCqlIndexValues<T
 
     // NOTE: query limit is max value to ensure all records are returned
     List<CompletableFuture<Result<MultipleRecords<T>>>> results = queries.stream()
-      .map(query -> cqlFinder.findByQuery(query, maximumLimit()))
+      .map(cqlFinder::findByQuery)
       .collect(Collectors.toList());
 
     return CompletableFuture.allOf(results.toArray(new CompletableFuture[0]))

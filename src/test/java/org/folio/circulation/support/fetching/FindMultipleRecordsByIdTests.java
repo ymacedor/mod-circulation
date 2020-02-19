@@ -3,11 +3,9 @@ package org.folio.circulation.support.fetching;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.folio.circulation.support.http.client.CqlQuery.exactMatch;
 import static org.folio.circulation.support.http.client.CqlQuery.exactMatchAny;
-import static org.folio.circulation.support.http.client.PageLimit.maximumLimit;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,7 +53,7 @@ public class FindMultipleRecordsByIdTests {
   public void shouldUseSingleCqlQueryForFindingSmallNumberOfRecordsById() {
     final int MAX_VALUES_PER_CQL_SEARCH_QUERY = 50;
 
-    when(queryFinder.findByQuery(any(), any())).thenReturn(
+    when(queryFinder.findByQuery(any())).thenReturn(
       CompletableFuture.completedFuture(Result.succeeded(MultipleRecords.empty())));
 
     final FindWithMultipleCqlIndexValues<JsonObject> fetcher
@@ -65,7 +63,7 @@ public class FindMultipleRecordsByIdTests {
 
     fetcher.findByIds(ids);
 
-    verify(queryFinder).findByQuery(generatedCqlQueries.capture(), eq(maximumLimit()));
+    verify(queryFinder).findByQuery(generatedCqlQueries.capture());
 
     final CqlQuery expectedQuery = exactMatchAny("id", ids).value();
 
@@ -79,7 +77,7 @@ public class FindMultipleRecordsByIdTests {
 
     final FindWithCqlQuery<JsonObject> queryFinder = mock(FindWithCqlQuery.class);
 
-    when(queryFinder.findByQuery(any(), any())).thenReturn(
+    when(queryFinder.findByQuery(any())).thenReturn(
         CompletableFuture.completedFuture(Result.succeeded(MultipleRecords.empty())));
 
     final FindWithMultipleCqlIndexValues<JsonObject> fetcher
@@ -91,7 +89,7 @@ public class FindMultipleRecordsByIdTests {
     fetcher.findByIds(combineSetsOfIds(firstSetOfIds, secondSetOfIds));
 
     verify(queryFinder, times(2))
-      .findByQuery(generatedCqlQueries.capture(), eq(maximumLimit()));
+      .findByQuery(generatedCqlQueries.capture());
 
     final CqlQuery firstExpectedQuery = exactMatchAny("id", firstSetOfIds).value();
     final CqlQuery secondExpectedQuery = exactMatchAny("id", secondSetOfIds).value();
@@ -104,7 +102,7 @@ public class FindMultipleRecordsByIdTests {
   public void shouldIncludeAdditionalQuery() {
     final FindWithCqlQuery<JsonObject> queryFinder = mock(FindWithCqlQuery.class);
 
-    when(queryFinder.findByQuery(any(), any())).thenReturn(
+    when(queryFinder.findByQuery(any())).thenReturn(
       CompletableFuture.completedFuture(Result.succeeded(MultipleRecords.empty())));
 
     final FindWithMultipleCqlIndexValues<JsonObject> fetcher
@@ -115,7 +113,7 @@ public class FindMultipleRecordsByIdTests {
 
     fetcher.findByIdIndexAndQuery(ids, "itemId", openStatusQuery);
 
-    verify(queryFinder).findByQuery(generatedCqlQueries.capture(), eq(maximumLimit()));
+    verify(queryFinder).findByQuery(generatedCqlQueries.capture());
 
     final CqlQuery expectedQuery = exactMatchAny("itemId", ids).value()
         .and(openStatusQuery.value());
@@ -129,7 +127,7 @@ public class FindMultipleRecordsByIdTests {
 
     final FindWithCqlQuery<JsonObject> queryFinder = mock(FindWithCqlQuery.class);
 
-    when(queryFinder.findByQuery(any(), any())).thenReturn(
+    when(queryFinder.findByQuery(any())).thenReturn(
       CompletableFuture.completedFuture(Result.succeeded(MultipleRecords.empty())));
 
     final FindWithMultipleCqlIndexValues<JsonObject> fetcher
@@ -143,7 +141,7 @@ public class FindMultipleRecordsByIdTests {
     assertThat("Should assume no records are found",
         result.isEmpty(), is(true));
 
-    verify(queryFinder, times(0)).findByQuery(any(), any());
+    verify(queryFinder, times(0)).findByQuery(any());
   }
 
   private Collection<String> generateIds(int size) {
