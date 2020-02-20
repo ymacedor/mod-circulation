@@ -1,8 +1,8 @@
 package org.folio.circulation.support.fetching;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
+import static org.folio.circulation.support.AsyncResultHelper.getFutureResultValue;
 import static org.folio.circulation.support.http.client.CqlQuery.exactMatch;
 import static org.folio.circulation.support.http.client.PageLimit.limit;
 import static org.hamcrest.CoreMatchers.is;
@@ -52,7 +52,7 @@ public class FindMultipleRecordsUsingCqlTests {
     when(client.getMany(eq(query.value()), eq(limit(10))))
       .thenReturn(cannedResponse(10));
 
-    MultipleRecords<JsonObject> records = getRecords(fetcher.findByQuery(query));
+    MultipleRecords<JsonObject> records = getFutureResultValue(fetcher.findByQuery(query));
 
     assertThat(records.getTotalRecords(), is(10));
     assertThat(records.getRecords().size(), is(10));
@@ -78,19 +78,5 @@ public class FindMultipleRecordsUsingCqlTests {
       .limit(numberOfRecords)
       .map(id -> new JsonObject().put("id", id.toString()))
       .collect(toList());
-  }
-
-  private MultipleRecords<JsonObject> getRecords(
-    CompletableFuture<Result<MultipleRecords<JsonObject>>> fetchedRecords) {
-
-    try {
-      final Result<MultipleRecords<JsonObject>> result = fetchedRecords
-        .get(1, SECONDS);
-
-      return result.value();
-
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 }

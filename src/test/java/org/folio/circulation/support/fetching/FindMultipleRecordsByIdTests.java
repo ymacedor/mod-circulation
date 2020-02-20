@@ -1,6 +1,6 @@
 package org.folio.circulation.support.fetching;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.folio.circulation.support.AsyncResultHelper.getFutureResultValue;
 import static org.folio.circulation.support.http.client.CqlQuery.exactMatch;
 import static org.folio.circulation.support.http.client.CqlQuery.exactMatchAny;
 import static org.hamcrest.CoreMatchers.is;
@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -117,9 +115,7 @@ public class FindMultipleRecordsByIdTests {
   }
 
   @Test
-  public void shouldAssumeNoRecordsAreFoundWhenSearchingForNoIds()
-      throws InterruptedException, ExecutionException, TimeoutException {
-
+  public void shouldAssumeNoRecordsAreFoundWhenSearchingForNoIds() {
     when(queryFinder.findByQuery(any())).thenReturn(
       CompletableFuture.completedFuture(Result.succeeded(MultipleRecords.empty())));
 
@@ -149,12 +145,6 @@ public class FindMultipleRecordsByIdTests {
 
     return Stream.concat(firstSetOfIds.stream(), secondSetOfIds.stream())
       .collect(Collectors.toList());
-  }
-
-  private <T> T getFutureResultValue(CompletableFuture<Result<T>> futureResult)
-      throws InterruptedException, ExecutionException, TimeoutException {
-
-    return futureResult.get(1, SECONDS).value();
   }
 
   private CqlQuery getCapturedQuery(
