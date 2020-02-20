@@ -67,4 +67,8 @@ public class PageLimit implements QueryParameter {
 
     return String.format("A page limit of \"%s\"", value);
   }
+
+  Integer getValue() {
+    return value;
+  }
 }
