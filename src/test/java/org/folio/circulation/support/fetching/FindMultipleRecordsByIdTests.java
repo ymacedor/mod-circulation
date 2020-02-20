@@ -6,7 +6,6 @@ import static org.folio.circulation.support.http.client.CqlQuery.exactMatchAny;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,8 +74,6 @@ public class FindMultipleRecordsByIdTests {
   public void shouldUseMultipleCqlQueriesForFindingSmallNumberOfRecordsById(
       int maximumValuesPerCqlQuery) {
 
-    final FindWithCqlQuery<JsonObject> queryFinder = mock(FindWithCqlQuery.class);
-
     when(queryFinder.findByQuery(any())).thenReturn(
         CompletableFuture.completedFuture(Result.succeeded(MultipleRecords.empty())));
 
@@ -100,8 +97,6 @@ public class FindMultipleRecordsByIdTests {
 
   @Test
   public void shouldIncludeAdditionalQuery() {
-    final FindWithCqlQuery<JsonObject> queryFinder = mock(FindWithCqlQuery.class);
-
     when(queryFinder.findByQuery(any())).thenReturn(
       CompletableFuture.completedFuture(Result.succeeded(MultipleRecords.empty())));
 
@@ -124,8 +119,6 @@ public class FindMultipleRecordsByIdTests {
   @Test
   public void shouldAssumeNoRecordsAreFoundWhenSearchingForNoIds()
       throws InterruptedException, ExecutionException, TimeoutException {
-
-    final FindWithCqlQuery<JsonObject> queryFinder = mock(FindWithCqlQuery.class);
 
     when(queryFinder.findByQuery(any())).thenReturn(
       CompletableFuture.completedFuture(Result.succeeded(MultipleRecords.empty())));

@@ -1,10 +1,10 @@
 package org.folio.circulation.support.fetching;
 
 import static java.util.function.Function.identity;
+import static org.folio.circulation.support.http.client.CqlQuery.exactMatch;
 import static org.folio.circulation.support.http.client.PageLimit.limit;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +18,7 @@ import org.folio.circulation.support.http.client.Response;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -30,26 +31,22 @@ public class FindMultipleRecordsUsingCqlTests {
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
 
+  @Mock
+  private GetManyRecordsClient client;
+
   @Test
   public void shouldFetchRecordsInSinglePage() {
-    final GetManyRecordsClient client = clientThatAlwaysReturnsCannedResponse();
-
     final FindWithCqlQuery<JsonObject> fetcher = new CqlQueryFinder<>(client,
       "records", identity(), limit(10));
 
-    final Result<CqlQuery> query = CqlQuery.exactMatch("Status", "Open");
+    final Result<CqlQuery> query = exactMatch("Status", "Open");
+
+    when(client.getMany(eq(query.value()), eq(limit(10))))
+      .thenReturn(cannedResponse());
 
     fetcher.findByQuery(query);
 
-    verify(client).getMany(eq(query.value()), eq(limit(10)));
-  }
-
-  private GetManyRecordsClient clientThatAlwaysReturnsCannedResponse() {
-    final GetManyRecordsClient mock = mock(GetManyRecordsClient.class);
-
-    when(mock.getMany(any(), any())).thenReturn(cannedResponse());
-
-    return mock;
+    verify(client, times(1)).getMany(eq(query.value()), eq(limit(10)));
   }
 
   private CompletableFuture<Result<Response>> cannedResponse() {
