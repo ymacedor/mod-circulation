@@ -47,14 +47,19 @@ public class MultipleRecords<T> {
   }
 
   public static <T> Result<MultipleRecords<T>> from(JsonObject representation,
-                                                    Function<JsonObject, T> mapper,
-                                                    String recordsPropertyName) {
+      Function<JsonObject, T> mapper, String recordsPropertyName) {
 
     List<T> wrappedRecords = mapToList(representation, recordsPropertyName, mapper);
     Integer totalRecords = representation.getInteger(TOTAL_RECORDS_PROPERTY_NAME);
 
-    return succeeded(new MultipleRecords<>(
-      wrappedRecords, totalRecords));
+    return succeeded(new MultipleRecords<>(wrappedRecords, totalRecords));
+  }
+
+  public static <T> Result<MultipleRecords<T>> aggregate(
+    List<Result<MultipleRecords<T>>> results) {
+
+    return Result.combineAll(results)
+      .map(records -> records.stream().reduce(empty(), MultipleRecords::combine));
   }
 
   public <R> Set<R> toKeys(Function<T, R> keyMapper) {
@@ -96,7 +101,7 @@ public class MultipleRecords<T> {
     final List<T> allRecords = concat(records.stream(), other.records.stream())
       .collect(Collectors.toList());
 
-    return new MultipleRecords<>(allRecords, totalRecords + other.totalRecords);
+    return new MultipleRecords<>(allRecords, other.totalRecords);
   }
 
   public JsonObject asJson(

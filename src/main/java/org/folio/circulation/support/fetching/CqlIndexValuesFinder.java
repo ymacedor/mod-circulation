@@ -3,7 +3,6 @@ package org.folio.circulation.support.fetching;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.stream.Collectors.collectingAndThen;
 import static org.apache.commons.collections4.ListUtils.partition;
-import static org.folio.circulation.domain.MultipleRecords.empty;
 import static org.folio.circulation.support.Result.of;
 import static org.folio.circulation.support.fetching.MultipleCqlIndexValuesCriteria.byId;
 import static org.folio.circulation.support.fetching.MultipleCqlIndexValuesCriteria.byIndex;
@@ -93,13 +92,7 @@ public class CqlIndexValuesFinder<T> implements FindWithMultipleCqlIndexValues<T
     return CompletableFuture.allOf(results.toArray(new CompletableFuture[0]))
       .thenApply(notUsed -> results.stream()
         .map(CompletableFuture::join)
-        .collect(collectingAndThen(Collectors.toList(), this::aggregate)));
+        .collect(collectingAndThen(Collectors.toList(), MultipleRecords::aggregate)));
   }
 
-  private Result<MultipleRecords<T>> aggregate(
-    List<Result<MultipleRecords<T>>> results) {
-
-    return Result.combineAll(results)
-      .map(records -> records.stream().reduce(empty(), MultipleRecords::combine));
-  }
 }

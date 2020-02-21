@@ -17,6 +17,10 @@ public class Offset implements QueryParameter {
     this.value = value;
   }
 
+  public Offset nextPage(PageLimit pageLimit) {
+    return new Offset(value + pageLimit.getValue());
+  }
+
   @Override
   public void consume(QueryStringParameterConsumer consumer) {
     consumer.consume("offset", value.toString());
