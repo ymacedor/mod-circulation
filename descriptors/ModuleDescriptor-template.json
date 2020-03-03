@@ -123,6 +123,22 @@
       ]
     },
     {
+      "id": "overdue-minutes",
+      "version": "0.1",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/circulation/loans/{id}/overdue-minutes",
+          "permissionsRequired": [
+            "circulation.loans.overdue-minutes.get"
+          ],
+          "modulePermissions": [
+            "modperms.circulation.loans.overdue-minutes.get"
+          ]
+        }
+      ]
+    },
+    {
       "id": "circulation",
       "version": "9.1",
       "handlers": [
@@ -1056,6 +1072,7 @@
         "circulation.loans.item.delete",
         "circulation.loans.collection.delete",
         "circulation.loans.claim-item-returned.post",
+        "circulation.loans.overdue-minutes.get",
         "circulation.rules.put",
         "circulation.rules.get",
         "circulation.rules.loan-policy.get",
@@ -2016,9 +2033,23 @@
         "circulation-storage.patron-notice-policies.collection.get"
       ],
       "visible": false
+    },
+    {
+      "permissionName": "modperms.circulation.loans.overdue-minutes.get",
+      "displayName" : "Get overdue minutes for a loan",
+      "description" : "Calculate the number of minutes a loan is overdue",
+      "subPermissions": [
+        "circulation.loans.item.get",
+        "circulation.loans.collection.get",
+        "calendar.opening-hours.item.get",
+        "calendar.opening-hours.collection.get",
+        "circulation-storage.loan-policies.item.get",
+        "circulation-storage.loan-policies.collection.get",
+        "overdue-fines-policies.item.get",
+        "overdue-fines-policies.collection.get"
+      ],
+      "visible": false
     }
-
-
   ],
   "launchDescriptor": {
     "dockerImage": "${artifactId}:${version}",

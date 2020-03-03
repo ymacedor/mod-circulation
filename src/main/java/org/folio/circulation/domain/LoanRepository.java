@@ -146,7 +146,7 @@ public class LoanRepository {
       .exceptionally(CommonFailures::failedDueToServerError);
   }
 
-  private CompletableFuture<Result<Loan>> fetchLoan(String id) {
+  public CompletableFuture<Result<Loan>> fetchLoan(String id) {
     return FetchSingleRecord.<Loan>forRecord("loan")
       .using(loansStorageClient)
       .mapTo(Loan::from)
