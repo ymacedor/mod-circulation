@@ -150,11 +150,13 @@ public class OverdueFineCalculatorServiceTest {
   }
 
   @Test
-  public void shouldNotCreateFeeFineRecordWhenLoanIsNotProvided() {
+  public void shouldNotCreateFeeFineRecordWhenLoanIsNotProvided() throws ExecutionException,
+    InterruptedException {
+
     CheckInProcessRecords records = mock(CheckInProcessRecords.class);
     when(records.getLoan()).thenReturn(null);
 
-    overdueFineCalculatorService.createOverdueFineIfNecessary(records, context);
+    overdueFineCalculatorService.createOverdueFineIfNecessary(records, context).get();
 
     verifyNoInteractions(accountRepository);
     verifyNoInteractions(feeFineActionRepository);
