@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "Overdue statuses",
+  "description": "Collection of overdue statuses of loans",
+  "properties": {
+    "overdueStatuses": {
+      "description": "Collection of overdue statuses of loans",
+      "id": "overdueStatuses",
+      "type": "array",
+      "items": {
+        "title": "Overdue status",
+        "description": "Overdue status of a loan",
+        "type": "object",
+        "properties": {
+          "loanId": {
+            "description": "UUID of a loan",
+            "type": "string",
+            "$ref": "uuid.json"
+          },
+          "overdue": {
+            "description": "Flag which indicates if the loan is overdue",
+            "type": "boolean"
+          },
+          "overdueMinutes": {
+            "description": "Calculated number of minutes a loan is overdue",
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "loanId",
+          "overdue"
+        ]
+      }
+    },
+    "totalRecords": {
+      "description": "Total number of overdue statuses",
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "overdueStatuses",
+    "totalRecords"
+  ]
+}

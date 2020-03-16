@@ -123,17 +123,17 @@
       ]
     },
     {
-      "id": "overdue-minutes",
+      "id": "overdue-statuses",
       "version": "0.1",
       "handlers": [
         {
-          "methods": ["GET"],
-          "pathPattern": "/circulation/loans/{id}/overdue-minutes",
+          "methods": ["POST"],
+          "pathPattern": "/circulation/loans/overdue-statuses",
           "permissionsRequired": [
-            "circulation.loans.overdue-minutes.get"
+            "circulation.loans.overdue-statuses.post"
           ],
           "modulePermissions": [
-            "modperms.circulation.loans.overdue-minutes.get"
+            "modperms.circulation.loans.overdue-statuses.post"
           ]
         }
       ]
@@ -2035,9 +2035,9 @@
       "visible": false
     },
     {
-      "permissionName": "modperms.circulation.loans.overdue-minutes.get",
-      "displayName" : "Get overdue minutes for a loan",
-      "description" : "Calculate the number of minutes a loan is overdue",
+      "permissionName": "modperms.circulation.loans.overdue-statuses.post",
+      "displayName": "module permissions for one op",
+      "description": "to reduce X-Okapi-Token size",
       "subPermissions": [
         "circulation.loans.item.get",
         "circulation.loans.collection.get",
