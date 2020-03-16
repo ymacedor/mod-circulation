@@ -184,7 +184,7 @@ public class OverdueFineCalculatorServiceTest {
       .withLoan(loan);
 
     overdueFineCalculatorService.createOverdueFineIfNecessary(records, context).get();
-    verify(accountRepository, times(1)).create(any());
+    verify(accountRepository, times(1)).create(any(AccountStorageRepresentation.class));
 
     ArgumentCaptor<AccountStorageRepresentation> account =
       ArgumentCaptor.forClass(AccountStorageRepresentation.class);
