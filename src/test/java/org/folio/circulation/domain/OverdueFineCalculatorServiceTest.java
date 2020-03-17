@@ -185,7 +185,6 @@ public class OverdueFineCalculatorServiceTest {
     when(feeFineRepository.getFeeFine(FEE_FINE_TYPE, true))
       .thenReturn(completedFuture(succeeded(feeFine)));
     when(accountRepository.create(any())).thenReturn(completedFuture(succeeded(createAccount())));
-
     doReturn(accountStorageRepresentation)
       .when(overdueFineCalculatorService)
       .createAccountRepresentation(any(Double.class),
@@ -196,6 +195,8 @@ public class OverdueFineCalculatorServiceTest {
       .withLoan(loan);
 
     overdueFineCalculatorService.createOverdueFineIfNecessary(records, context).get();
+    verify(overdueFineCalculatorService, times(1)).createAccountRepresentation(any(Double.class),
+      any(OverdueFineCalculatorService.CalculationParameters.class));
     verify(accountRepository, times(1)).create(accountStorageRepresentation);
 
     ArgumentCaptor<AccountStorageRepresentation> account =
