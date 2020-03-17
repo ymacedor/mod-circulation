@@ -193,13 +193,19 @@ public class OverdueFineCalculatorService {
       return completedFuture(succeeded(null));
     }
 
-    AccountStorageRepresentation accountRepresentation =
-      new AccountStorageRepresentation(params.loan, params.item, params.feeFineOwner,
-        params.feeFine, fineAmount);
+    AccountStorageRepresentation accountRepresentation = createAccountRepresentation(fineAmount,
+      params);
 
     return repos.accountRepository.create(accountRepresentation)
       .thenCompose(rac -> rac.after(account -> this.createFeeFineAction(account, params)
         .thenApply(rfa -> rfa.map(feeFineAction -> null))));
+  }
+
+  AccountStorageRepresentation createAccountRepresentation(Double fineAmount,
+    CalculationParameters params) {
+
+    return new AccountStorageRepresentation(params.loan, params.item, params.feeFineOwner,
+      params.feeFine, fineAmount);
   }
 
   private CompletableFuture<Result<FeeFineAction>> createFeeFineAction(
@@ -210,7 +216,7 @@ public class OverdueFineCalculatorService {
       params.loggedInUser));
   }
 
-  private static class CalculationParameters {
+  static class CalculationParameters {
     final Loan loan;
     final Item item;
     final FeeFineOwner feeFineOwner;

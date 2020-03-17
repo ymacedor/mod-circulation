@@ -4,7 +4,9 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.folio.circulation.support.Result.succeeded;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -137,11 +139,11 @@ public class OverdueFineCalculatorServiceTest {
     userRepository = mock(UserRepository.class);
     feeFineActionRepository = mock(FeeFineActionRepository.class);
 
-    overdueFineCalculatorService = new OverdueFineCalculatorService(
+    overdueFineCalculatorService = spy(new OverdueFineCalculatorService(
       new OverdueFineCalculatorService.Repos(
         overdueFinePolicyRepository, accountRepository, itemRepository,
         feeFineOwnerRepository, feeFineRepository, userRepository, feeFineActionRepository),
-      overduePeriodCalculatorService);
+      overduePeriodCalculatorService));
 
     context = mock(WebContext.class);
     when(context.getUserId()).thenReturn(LOGGED_IN_USER.getId());
@@ -166,25 +168,35 @@ public class OverdueFineCalculatorServiceTest {
   public void shouldCreateFeeFineRecordWhenAmountIsPositive()
     throws ExecutionException, InterruptedException {
     Loan loan = createLoan();
+    Item item = createItem();
+    FeeFineOwner feeFineOwner = createFeeFineOwner();
+    FeeFine feeFine = createFeeFine();
+    AccountStorageRepresentation accountStorageRepresentation = new AccountStorageRepresentation(
+      loan, item, feeFineOwner, feeFine, correctOverdueFine);
 
     when(overdueFinePolicyRepository.findOverdueFinePolicyForLoan(any()))
       .thenReturn(completedFuture(succeeded(loan)));
     when(overduePeriodCalculatorService.getMinutes(any(), any()))
       .thenReturn(completedFuture(succeeded(periodCalculatorResult)));
     when(itemRepository.fetchItemRelatedRecords(any()))
-      .thenReturn(completedFuture(succeeded(createItem())));
+      .thenReturn(completedFuture(succeeded(item)));
     when(feeFineOwnerRepository.getFeeFineOwner(SERVICE_POINT_ID.toString()))
-      .thenReturn(completedFuture(succeeded(createFeeFineOwner())));
+      .thenReturn(completedFuture(succeeded(feeFineOwner)));
     when(feeFineRepository.getFeeFine(FEE_FINE_TYPE, true))
-      .thenReturn(completedFuture(succeeded(createFeeFine())));
+      .thenReturn(completedFuture(succeeded(feeFine)));
     when(accountRepository.create(any())).thenReturn(completedFuture(succeeded(createAccount())));
+
+    doReturn(accountStorageRepresentation)
+      .when(overdueFineCalculatorService)
+      .createAccountRepresentation(any(Double.class),
+        any(OverdueFineCalculatorService.CalculationParameters.class));
 
     CheckInProcessRecords records = new CheckInProcessRecords(
       CheckInByBarcodeRequest.from(createCheckInByBarcodeRequest()).value())
       .withLoan(loan);
 
     overdueFineCalculatorService.createOverdueFineIfNecessary(records, context).get();
-    verify(accountRepository, times(1)).create(any(AccountStorageRepresentation.class));
+    verify(accountRepository, times(1)).create(accountStorageRepresentation);
 
     ArgumentCaptor<AccountStorageRepresentation> account =
       ArgumentCaptor.forClass(AccountStorageRepresentation.class);
