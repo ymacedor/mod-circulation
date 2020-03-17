@@ -1,31 +1,28 @@
 #%RAML 1.0
-title: Loan overdue status
+title: Loans overdue status
 version: v0.1
 protocols: [ HTTP, HTTPS ]
 baseUri: http://localhost:9130
 
 documentation:
-  - title: API for loan overdue statuses
-    content: <b>API for fetching overdue statuses of loans</b>
+  - title: API for loans overdue status
+    content: <b>API for fetching overdue status of loans</b>
 
 traits:
-  language: !include raml-util/traits/language.raml
+  validate: !include raml-util/traits/validation.raml
 
-types:
-  errors: !include raml-util/schemas/errors.schema
-
-/circulation/loans/overdue-statuses:
+/circulation/loans/overdue-status:
     description: "Check if the loans are overdue, and calculate overdue minutes for every loan that is. The strategy for calculation depends on the configuration of applicable Overdue Fine Policy."
-  get:
+  post:
+    is: [validate]
+    body:
+      application/json:
+        type: !include loans-overdue-status-request.json
     responses:
       200:
         body:
           application/json:
-            type: !include loans-overdue-statuses.json
-      400:
-        description: "The loan is closed"
-      404:
-        description: "The loan is not found"
+            type: !include loans-overdue-status-response.json
       500:
         description: "Internal server error, e.g. due to misconfiguration"
         body:

@@ -1,12 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "title": "Overdue statuses",
-  "description": "Collection of overdue statuses of loans",
+  "title": "Loans overdue status response",
+  "description": "Loans overdue status response",
   "properties": {
-    "overdueStatuses": {
+    "overdueStatus": {
       "description": "Collection of overdue statuses of loans",
-      "id": "overdueStatuses",
+      "id": "overdueStatus",
       "type": "array",
       "items": {
         "title": "Overdue status",

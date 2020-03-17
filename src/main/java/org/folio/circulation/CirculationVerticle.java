@@ -18,7 +18,7 @@ import org.folio.circulation.resources.LoanCollectionResource;
 import org.folio.circulation.resources.LostItemCirculationRulesEngineResource;
 import org.folio.circulation.resources.NoticeCirculationRulesEngineResource;
 import org.folio.circulation.resources.OverdueFineCirculationRulesEngineResource;
-import org.folio.circulation.resources.LoansOverdueStatusesResource;
+import org.folio.circulation.resources.LoansOverdueStatusResource;
 import org.folio.circulation.resources.OverrideCheckOutStrategy;
 import org.folio.circulation.resources.OverrideRenewalStrategy;
 import org.folio.circulation.resources.PickSlipsResource;
@@ -87,7 +87,7 @@ public class CirculationVerticle extends AbstractVerticle {
       .register(router);
     new PickSlipsResource("/circulation/pick-slips/:servicePointId", client)
       .register(router);
-    new LoansOverdueStatusesResource("/circulation/loans/overdue-statuses", client)
+    new LoansOverdueStatusResource("/circulation/loans/overdue-status", client)
       .register(router);
 
     new CirculationRulesResource("/circulation/rules", client)

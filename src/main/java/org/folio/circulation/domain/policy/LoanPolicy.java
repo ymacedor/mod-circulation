@@ -520,6 +520,10 @@ public class LoanPolicy extends Policy {
     return getLoansPolicy().getInteger("itemLimit");
   }
 
+  public boolean isUnknown() {
+    return this instanceof UnknownLoanPolicy;
+  }
+
   public AppliedRuleConditions getRuleConditions() {
     return ruleConditionsEntity;
   }

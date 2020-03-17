@@ -228,7 +228,7 @@ public class Loan implements ItemRelatedRecord, UserRelatedRecord {
     return getBooleanProperty(representation, "dueDateChangedByRecall");
   }
 
-  private String getStatus() {
+  public String getStatus() {
     return getNestedStringProperty(representation, STATUS, "name");
   }
 

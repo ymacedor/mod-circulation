@@ -250,6 +250,12 @@ public class ResourceClient {
       rootUrl(), 201, "create-record"));
   }
 
+  public IndividualResource create(JsonObject representation, URL url, int code) {
+
+    return  new IndividualResource(restAssuredClient.post(representation,
+      url, code, "create-record"));
+  }
+
   public Response attemptCreateAtSpecificLocation(Builder builder) {
 
     final JsonObject representation = builder.create();

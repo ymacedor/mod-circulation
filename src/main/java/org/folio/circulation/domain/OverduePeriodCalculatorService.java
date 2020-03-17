@@ -30,17 +30,24 @@ public class OverduePeriodCalculatorService {
   }
 
   public CompletableFuture<Result<Integer>> getMinutes(Loan loan, DateTime systemTime) {
-    final Boolean shouldCountClosedPeriods = loan.getOverdueFinePolicy().getCountPeriodsWhenServicePointIsClosed();
+    final Boolean shouldCountClosedPeriods =
+      loan.getOverdueFinePolicy().getCountPeriodsWhenServicePointIsClosed();
 
     if (preconditionsAreMet(loan, systemTime, shouldCountClosedPeriods)) {
-      return completedFuture(loan)
-        .thenComposeAsync(loanPolicyRepository::lookupPolicy)
-        .thenApply(r -> r.map(loan::withLoanPolicy))
+        return fetchLoanPolicyIfMissing(loan)
         .thenCompose(r -> r.after(l -> getOverdueMinutes(l, systemTime, shouldCountClosedPeriods)
-            .thenApply(flatMapResult(om -> adjustOverdueWithGracePeriod(l, om)))));
+          .thenApply(flatMapResult(om -> adjustOverdueWithGracePeriod(l, om)))));
     }
 
     return completedFuture(succeeded(ZERO_MINUTES));
+  }
+
+  private CompletableFuture<Result<Loan>> fetchLoanPolicyIfMissing(Loan loan) {
+    Result<Loan> loanResult = succeeded(loan);
+
+    return loan.getLoanPolicy().isUnknown()
+      ? loanPolicyRepository.findPolicyForLoan(loanResult)
+      : completedFuture(loanResult);
   }
 
   boolean preconditionsAreMet(Loan loan, DateTime systemTime, Boolean shouldCountClosedPeriods) {

@@ -204,11 +204,15 @@ public class LoanRepository {
   }
 
   public CompletableFuture<Result<MultipleRecords<Loan>>> findByIds(Collection<String> loanIds) {
+    return findByIdsWithoutItems(loanIds)
+      .thenComposeAsync(loans -> itemRepository.fetchItemsFor(loans, Loan::withItem));
+  }
+
+  public CompletableFuture<Result<MultipleRecords<Loan>>> findByIdsWithoutItems(Collection<String> loanIds) {
     FindWithMultipleCqlIndexValues<Loan> fetcher =
       findWithMultipleCqlIndexValues(loansStorageClient, "loans", Loan::from);
 
-    return fetcher.findByIds(loanIds)
-      .thenComposeAsync(loans -> itemRepository.fetchItemsFor(loans, Loan::withItem));
+    return fetcher.findByIds(loanIds);
   }
 
   private Result<MultipleRecords<Loan>> mapResponseToLoans(Response response) {

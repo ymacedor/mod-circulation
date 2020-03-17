@@ -123,17 +123,17 @@
       ]
     },
     {
-      "id": "overdue-statuses",
+      "id": "overdue-status",
       "version": "0.1",
       "handlers": [
         {
           "methods": ["POST"],
-          "pathPattern": "/circulation/loans/overdue-statuses",
+          "pathPattern": "/circulation/loans/overdue-status",
           "permissionsRequired": [
-            "circulation.loans.overdue-statuses.post"
+            "circulation.loans.overdue-status.post"
           ],
           "modulePermissions": [
-            "modperms.circulation.loans.overdue-statuses.post"
+            "modperms.circulation.loans.overdue-status.post"
           ]
         }
       ]
@@ -1072,7 +1072,7 @@
         "circulation.loans.item.delete",
         "circulation.loans.collection.delete",
         "circulation.loans.claim-item-returned.post",
-        "circulation.loans.overdue-minutes.get",
+        "circulation.loans.overdue-status.post",
         "circulation.rules.put",
         "circulation.rules.get",
         "circulation.rules.loan-policy.get",
@@ -2035,7 +2035,7 @@
       "visible": false
     },
     {
-      "permissionName": "modperms.circulation.loans.overdue-statuses.post",
+      "permissionName": "modperms.circulation.loans.overdue-status.post",
       "displayName": "module permissions for one op",
       "description": "to reduce X-Okapi-Token size",
       "subPermissions": [
