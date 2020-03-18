@@ -186,7 +186,7 @@ public class OverdueFineCalculatorService {
       .thenCompose(r -> r.after(params -> createAccount(fineAmount, params)));
   }
 
-  private CompletableFuture<Result<Void>> createAccount(Double fineAmount,
+  CompletableFuture<Result<Void>> createAccount(Double fineAmount,
     CalculationParameters params) {
 
     if (params.isIncomplete()) {

@@ -3,6 +3,7 @@ package org.folio.circulation.domain;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.folio.circulation.support.Result.succeeded;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -195,8 +196,21 @@ public class OverdueFineCalculatorServiceTest {
       .withLoan(loan);
 
     overdueFineCalculatorService.createOverdueFineIfNecessary(records, context).get();
+
+    // check calculation parameters
+    ArgumentCaptor<OverdueFineCalculatorService.CalculationParameters> params =
+      ArgumentCaptor.forClass(OverdueFineCalculatorService.CalculationParameters.class);
+    verify(overdueFineCalculatorService).createAccount(any(Double.class), params.capture());
+    assertSame(loan, params.getValue().loan);
+    assertSame(item, params.getValue().item);
+    assertSame(feeFineOwner, params.getValue().feeFineOwner);
+    assertSame(feeFine, params.getValue().feeFine);
+    assertSame(item, params.getValue().item);
+    assertSame(LOGGED_IN_USER, params.getValue().loggedInUser);
+
     verify(overdueFineCalculatorService, times(1)).createAccountRepresentation(any(Double.class),
       any(OverdueFineCalculatorService.CalculationParameters.class));
+
     verify(accountRepository, times(1)).create(accountStorageRepresentation);
 
     ArgumentCaptor<AccountStorageRepresentation> account =
