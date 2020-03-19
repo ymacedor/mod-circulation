@@ -133,7 +133,7 @@ public class OverdueFineCalculatorService {
     return CompletableFuture.completedFuture(succeeded(overdueFine));
   }
 
-  private CompletableFuture<Result<CalculationParameters>> lookupItemRelatedRecords(
+  CompletableFuture<Result<CalculationParameters>> lookupItemRelatedRecords(
     CalculationParameters params) {
 
     if (params.feeFine == null) {
@@ -144,7 +144,7 @@ public class OverdueFineCalculatorService {
       .thenApply(mapResult(params::withItem));
   }
 
-  private CompletableFuture<Result<CalculationParameters>> lookupFeeFineOwner(
+  CompletableFuture<Result<CalculationParameters>> lookupFeeFineOwner(
     CalculationParameters params) {
 
     return Optional.ofNullable(params.item)
@@ -156,14 +156,14 @@ public class OverdueFineCalculatorService {
       .orElse(completedFuture(succeeded(params)));
   }
 
-  private CompletableFuture<Result<CalculationParameters>> lookupFeeFine(
+  CompletableFuture<Result<CalculationParameters>> lookupFeeFine(
     CalculationParameters params) {
 
     return repos.feeFineRepository.getFeeFine(FeeFine.OVERDUE_FINE_TYPE, true)
       .thenApply(mapResult(params::withFeeFine));
   }
 
-  private CompletableFuture<Result<CalculationParameters>> lookupLoggedInUser(
+  CompletableFuture<Result<CalculationParameters>> lookupLoggedInUser(
     CalculationParameters params, String loggedInUserId) {
 
     return repos.userRepository.getUser(loggedInUserId)
@@ -206,17 +206,11 @@ public class OverdueFineCalculatorService {
         .thenApply(rfa -> rfa.map(feeFineAction -> null))));
   }
 
-  void beforeIncompleteCheck() {
+  void beforeIncompleteCheck() { }
 
-  }
+  void afterIncompleteCheck() { }
 
-  void afterIncompleteCheck() {
-
-  }
-
-  void incomplete() {
-
-  }
+  void incomplete() { }
 
   AccountStorageRepresentation createAccountRepresentation(Double fineAmount,
     CalculationParameters params) {
