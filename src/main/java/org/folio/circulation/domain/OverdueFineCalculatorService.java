@@ -189,9 +189,14 @@ public class OverdueFineCalculatorService {
   CompletableFuture<Result<Void>> createAccount(Double fineAmount,
     CalculationParameters params) {
 
+    beforeIncompleteCheck();
+
     if (params.isIncomplete()) {
+      incomplete();
       return completedFuture(succeeded(null));
     }
+
+    afterIncompleteCheck();
 
     AccountStorageRepresentation accountRepresentation = createAccountRepresentation(fineAmount,
       params);
@@ -199,6 +204,18 @@ public class OverdueFineCalculatorService {
     return repos.accountRepository.create(accountRepresentation)
       .thenCompose(rac -> rac.after(account -> this.createFeeFineAction(account, params)
         .thenApply(rfa -> rfa.map(feeFineAction -> null))));
+  }
+
+  void beforeIncompleteCheck() {
+
+  }
+
+  void afterIncompleteCheck() {
+
+  }
+
+  void incomplete() {
+
   }
 
   AccountStorageRepresentation createAccountRepresentation(Double fineAmount,

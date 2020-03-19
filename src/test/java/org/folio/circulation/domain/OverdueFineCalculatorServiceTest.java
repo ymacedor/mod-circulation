@@ -200,7 +200,13 @@ public class OverdueFineCalculatorServiceTest {
     // check calculation parameters
     ArgumentCaptor<OverdueFineCalculatorService.CalculationParameters> params =
       ArgumentCaptor.forClass(OverdueFineCalculatorService.CalculationParameters.class);
+
     verify(overdueFineCalculatorService).createAccount(any(Double.class), params.capture());
+
+    verify(overdueFineCalculatorService, times(0)).incomplete();
+    verify(overdueFineCalculatorService, times(1)).beforeIncompleteCheck();
+    verify(overdueFineCalculatorService, times(1)).afterIncompleteCheck();
+
     assertSame(loan, params.getValue().loan);
     assertSame(item, params.getValue().item);
     assertSame(feeFineOwner, params.getValue().feeFineOwner);
