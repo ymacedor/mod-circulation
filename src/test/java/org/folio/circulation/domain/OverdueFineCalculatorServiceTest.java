@@ -168,12 +168,14 @@ public class OverdueFineCalculatorServiceTest {
   @Test
   public void shouldCreateFeeFineRecordWhenAmountIsPositive()
     throws ExecutionException, InterruptedException {
-    Loan loan = createLoan();
+    Loan loan = spy(createLoan());
     Item item = createItem();
     FeeFineOwner feeFineOwner = createFeeFineOwner();
     FeeFine feeFine = createFeeFine();
     AccountStorageRepresentation accountStorageRepresentation = new AccountStorageRepresentation(
       loan, item, feeFineOwner, feeFine, correctOverdueFine);
+
+    when(loan.isOverdue(any())).thenReturn(true);
 
     when(overdueFinePolicyRepository.findOverdueFinePolicyForLoan(any()))
       .thenReturn(completedFuture(succeeded(loan)));
