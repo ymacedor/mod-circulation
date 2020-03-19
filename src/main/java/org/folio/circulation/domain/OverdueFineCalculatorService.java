@@ -85,18 +85,18 @@ public class OverdueFineCalculatorService {
         l -> doNothing));
   }
 
-  private CompletableFuture<Result<Boolean>> shouldCreateFine(Loan loan, Scenario scenario) {
+  CompletableFuture<Result<Boolean>> shouldCreateFine(Loan loan, Scenario scenario) {
     return completedFuture(succeeded(
       scenario.shouldCreateFine.test(loan.getOverdueFinePolicy())));
   }
 
-  private CompletableFuture<Result<Void>> createOverdueFine(Loan loan, String loggedInUserId) {
+  CompletableFuture<Result<Void>> createOverdueFine(Loan loan, String loggedInUserId) {
     return getOverdueMinutes(loan)
       .thenCompose(r -> r.after(minutes -> calculateOverdueFine(loan, minutes)))
       .thenCompose(r -> r.after(fine -> createFeeFineRecord(loan, fine, loggedInUserId)));
   }
 
-  private CompletableFuture<Result<Integer>> getOverdueMinutes(Loan loan) {
+  CompletableFuture<Result<Integer>> getOverdueMinutes(Loan loan) {
     DateTime systemTime = loan.getReturnDate();
     if (systemTime == null) {
       systemTime = DateTime.now(DateTimeZone.UTC);
@@ -104,7 +104,7 @@ public class OverdueFineCalculatorService {
     return overduePeriodCalculatorService.getMinutes(loan, systemTime);
   }
 
-  private CompletableFuture<Result<Double>> calculateOverdueFine(Loan loan, Integer overdueMinutes) {
+  CompletableFuture<Result<Double>> calculateOverdueFine(Loan loan, Integer overdueMinutes) {
     double overdueFine = 0.0;
 
     OverdueFinePolicy overdueFinePolicy = loan.getOverdueFinePolicy();
@@ -170,7 +170,7 @@ public class OverdueFineCalculatorService {
       .thenApply(ResultBinding.mapResult(params::withLoggedInUser));
   }
 
-  private CompletableFuture<Result<Void>> createFeeFineRecord(Loan loan, Double fineAmount,
+  CompletableFuture<Result<Void>> createFeeFineRecord(Loan loan, Double fineAmount,
     String loggedInUserId) {
 
     if (fineAmount <= 0) {

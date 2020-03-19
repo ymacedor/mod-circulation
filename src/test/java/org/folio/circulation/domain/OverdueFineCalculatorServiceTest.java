@@ -201,6 +201,11 @@ public class OverdueFineCalculatorServiceTest {
     ArgumentCaptor<OverdueFineCalculatorService.CalculationParameters> params =
       ArgumentCaptor.forClass(OverdueFineCalculatorService.CalculationParameters.class);
 
+    verify(overdueFineCalculatorService, times(1)).shouldCreateFine(any(), any());
+    verify(overdueFineCalculatorService, times(1)).createOverdueFine(any(), any());
+    verify(overdueFineCalculatorService, times(1)).getOverdueMinutes(any());
+    verify(overdueFineCalculatorService, times(1)).calculateOverdueFine(any(), any());
+    verify(overdueFineCalculatorService, times(1)).createFeeFineRecord(any(), any(), any());
     verify(overdueFineCalculatorService, times(1)).lookupFeeFine(any());
     verify(overdueFineCalculatorService, times(1)).lookupItemRelatedRecords(any());
     verify(overdueFineCalculatorService, times(1)).lookupFeeFineOwner(any());
