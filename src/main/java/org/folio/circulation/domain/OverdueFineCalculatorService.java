@@ -74,9 +74,12 @@ public class OverdueFineCalculatorService {
     Result<Loan> loanResult = succeeded(loan);
     CompletableFuture<Result<Loan>> doNothing = completedFuture(loanResult);
 
+    beforeLoanCheck();
     if (loan == null || !loan.isOverdue()) {
+      doNothing();
       return doNothing;
     }
+    afterLoanCheck();
 
     return repos.overdueFinePolicyRepository.findOverdueFinePolicyForLoan(loanResult)
       .thenCompose(r -> r.afterWhen(
@@ -84,6 +87,12 @@ public class OverdueFineCalculatorService {
         l -> createOverdueFine(l, loggedInUserId).thenApply(mapResult(res -> loan)),
         l -> doNothing));
   }
+
+  void beforeLoanCheck() { }
+
+  void afterLoanCheck() { }
+
+  void doNothing() { }
 
   CompletableFuture<Result<Boolean>> shouldCreateFine(Loan loan, Scenario scenario) {
     return completedFuture(succeeded(
